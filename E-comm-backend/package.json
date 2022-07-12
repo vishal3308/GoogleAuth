@@ -1,0 +1,27 @@
+{
+  "name": "e-comm-backend",
+  "version": "1.0.0",
+  "description": "It's back-end file of E-commerce website ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vishal"
+  ],
+  "author": "Vishal Maurya",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^4.7.0",
+    "mongoose": "^6.4.2",
+    "mongoose-findorcreate": "^3.0.0",
+    "nodemon": "^2.0.18",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0"
+  }
+}
