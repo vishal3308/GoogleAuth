@@ -1,6 +1,5 @@
 const passport = require('passport');
 const Googlekey = require('./keys');
-const session=require('express-session')
 const User = require('../Userschema');
 // ============Google Authentication===================
 

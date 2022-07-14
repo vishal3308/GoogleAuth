@@ -1,5 +1,4 @@
 const mongoose=require('mongoose');
-const findOrCreate=require('mongoose-findorcreate')
 
 // ============Google Authentication===================
 
@@ -11,5 +10,4 @@ const userSchema=new mongoose.Schema({
     google_id:String,
     avatar:String
 })
-userSchema.plugin(findOrCreate);
 module.exports=mongoose.model('users',userSchema);

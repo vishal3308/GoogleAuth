@@ -89,6 +89,10 @@ a{color:inherit;text-decoration:none}
 .login-form .group .button{
 	background:#1161ee;
 }
+.login-form .google{
+	background-color: #e13737;
+    border: none;
+}
 .login-form .group label .icon{
 	width:15px;
 	height:15px;

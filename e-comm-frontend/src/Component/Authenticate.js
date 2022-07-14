@@ -1,22 +1,23 @@
-import React, {  useEffect } from "react";
-import { Navigate } from "react-router";
-export default function Authenticate() {
-    const queryParams = new URLSearchParams(window.location.search);
-
-    useEffect(() => {
-        if (queryParams.get('auth')) {
-            const Auth=queryParams.get('auth');
-            const name = queryParams.get('name');
-            const email = queryParams.get('email');
-            const Avatar = queryParams.get('avatar');
-            localStorage.setItem('E-comm_token', Auth)
-            localStorage.setItem('E-comm_name', name)
-            localStorage.setItem('E-comm_email', email)
-            localStorage.setItem('E-comm_avatar', Avatar)
-        }
-        console.log("Home Auth ");
-    }, [])
+import React from 'react'
+import { useSearchParams,Navigate } from 'react-router-dom';
+export default function Home() {
+    const [serach, setsearch] = useSearchParams()
+    const Auth = serach.get('auth');
+    if (Auth) {
+        const name = serach.get('name');
+        const email = serach.get('email');
+        const Avatar = serach.get('avatar');
+        localStorage.setItem('E-comm_token', Auth)
+        localStorage.setItem('E-comm_token', Auth)
+        localStorage.setItem('E-comm_name', name)
+        localStorage.setItem('E-comm_email', email)
+        localStorage.setItem('E-comm_avatar', Avatar)
+        console.log('local storage set..')
+    }
     return (
-        <Navigate to='/productlist'/>
+        <>
+            {Auth ? <Navigate to='/productlist'/>: <Navigate to='/login'/>
+            }
+        </>
     )
 }

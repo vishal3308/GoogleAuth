@@ -1,0 +1,13 @@
+.navbar .active{
+    background-color: #69f1bf;
+}
+.navbar .profile{
+    margin-left: 5px
+}
+.mobile-navbar{
+    background-color: #69f1bf;
+    justify-content: space-between;
+}
+.mobile-profile{
+    margin-right: 10px;
+}

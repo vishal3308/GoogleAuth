@@ -4,7 +4,7 @@ export default function Logout(){
     const Navigate=useNavigate();
     useEffect(()=>{
         localStorage.clear();
-        Navigate('/signup');
+        Navigate('/login');
     })
 
 }

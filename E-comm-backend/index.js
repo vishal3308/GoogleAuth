@@ -51,7 +51,6 @@ app.get('/login/failure',(req,resp)=>{
 app.post('/signup',async(req,resp)=>{
     let Email=req.body.email;
     let userExist=await User.findOne({email:Email});
-    console.log(userExist);
     if(userExist){
         resp.send({status:"Email id is already exist, please login with Email and Password"});
     }
@@ -95,7 +94,7 @@ app.get('/logout',(req,resp)=>{
     req.logout(()=>{
       console.log('Logged out !!')
     });
-    resp.redirect(PortalURL);
+    resp.redirect(PortalURL+'/login');
 })
 
 app.listen(PORT);

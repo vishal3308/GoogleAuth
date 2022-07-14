@@ -1,18 +1,24 @@
 import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
 import GoogleIcon from '@mui/icons-material/Google';
-import React, { useContext, useState } from "react";
+import SendIcon from '@mui/icons-material/Send';
+import React, { useContext, useEffect, useState} from "react";
 import { Url } from '../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 export default function Signup() {
+    let navigate = useNavigate()
+    useEffect(()=>{
+        if(localStorage.getItem('E-comm_token')){
+            console.log('login already done')
+            navigate('/productlist')
+        }
+    })
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
-    let Navigate = useNavigate()
     const url = useContext(Url);
     function GoogleAuth(){
         window.open('http://localhost:4000/auth/google',"_self")
@@ -46,7 +52,7 @@ export default function Signup() {
                     localStorage.setItem('E-comm_token', res.auth)
                     localStorage.setItem('E-comm_name',res.result.name)
                     localStorage.setItem('E-comm_email',res.result.email)
-                    Navigate('/productlist')
+                    navigate('/productlist')
                 }
             }).catch((err) => {
                 setError(true);
@@ -84,8 +90,8 @@ export default function Signup() {
                                 Login
                             </LoadingButton>
                             
-                            <Button variant="contained" onClick={GoogleAuth} color='success' size="small" startIcon={<GoogleIcon />}>
-                                Google
+                            <Button variant="contained" className='google' onClick={GoogleAuth} color='success' size="small" startIcon={<GoogleIcon />}>
+                            Continue with Google
                             </Button>
                             
                         </div>

@@ -1,11 +1,20 @@
+import React, { useContext, useEffect, useState } from "react";
 import LoadingButton from '@mui/lab/LoadingButton';
 import SendIcon from '@mui/icons-material/Send';
-import React, { useContext, useState } from "react";
+import Button from '@mui/material/Button';
+import GoogleIcon from '@mui/icons-material/Google';
 import Validator from 'validator';
 import { Url } from '../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 export default function Signup() {
+    let Navigate = useNavigate()
+    useEffect(()=>{
+        if(localStorage.getItem('E-comm_token')){
+            console.log('login already done')
+            Navigate('/productlist')
+        }
+    })
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -13,8 +22,12 @@ export default function Signup() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
-    let Navigate = useNavigate()
     const url = useContext(Url);
+    // ============Googe authentication window====
+    function GoogleAuth(){
+        window.open('http://localhost:4000/auth/google',"_self")
+    }
+// ==============Signup function Callling=============
     function Sign_up(e) {
         e.preventDefault();
         if (!email || !name || !password || !confirmpass) {
@@ -52,8 +65,9 @@ export default function Signup() {
                     setErrormassage(res.status)
                 }
                 else {
-                    localStorage.setItem('E-commtoken', res.auth)
-                    localStorage.setItem('E-commuser', JSON.stringify(res.result))
+                    localStorage.setItem('E-comm_token', res.auth)
+                    localStorage.setItem('E-comm_name', res.result.name)
+                    localStorage.setItem('E-comm_email', res.result.email)
                     Navigate('/productlist')
                 }
             }).catch((err) => {
@@ -94,10 +108,13 @@ export default function Signup() {
                                 loadingPosition="end"
                                 variant="contained"
                                 type="submit"
-                                sx={{ color: 'rgb(245 237 237)' }}
+                                sx={{ color: 'rgb(245 237 237)',margin:'2px 5px' }}
                             >
                                 Sign Up
                             </LoadingButton>
+                            <Button variant="contained" className='google' onClick={GoogleAuth} color='success' size="small" startIcon={<GoogleIcon />}>
+                               Continue with Google
+                            </Button>
 
                         </div>
                         <div className="group">
