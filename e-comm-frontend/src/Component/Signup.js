@@ -66,8 +66,8 @@ export default function Signup() {
                 }
                 else {
                     localStorage.setItem('E-comm_token', res.auth)
-                    localStorage.setItem('E-comm_name', res.result.name)
-                    localStorage.setItem('E-comm_email', res.result.email)
+                    localStorage.setItem('E-comm_name', res.user.name)
+                    localStorage.setItem('E-comm_email', res.user.email)
                     Navigate('/productlist')
                 }
             }).catch((err) => {

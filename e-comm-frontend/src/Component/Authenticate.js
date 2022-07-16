@@ -12,7 +12,6 @@ export default function Home() {
         localStorage.setItem('E-comm_name', name)
         localStorage.setItem('E-comm_email', email)
         localStorage.setItem('E-comm_avatar', Avatar)
-        console.log('local storage set..')
     }
     return (
         <>

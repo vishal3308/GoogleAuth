@@ -44,14 +44,14 @@ export default function Signup() {
             body: JSON.stringify(data)
         }).then((resp) => resp.json())
             .then((res) => {
-                if (res.status) {
+                if (res.Error) {
                     setError(true);
-                    setErrormassage(res.status)
+                    setErrormassage(res.Error)
                 }
                 else {
                     localStorage.setItem('E-comm_token', res.auth)
-                    localStorage.setItem('E-comm_name',res.result.name)
-                    localStorage.setItem('E-comm_email',res.result.email)
+                    localStorage.setItem('E-comm_name',res.user.name)
+                    localStorage.setItem('E-comm_email',res.user.email)
                     navigate('/productlist')
                 }
             }).catch((err) => {

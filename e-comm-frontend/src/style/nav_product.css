@@ -1,13 +1,36 @@
-.navbar .active{
+body{
+    background:radial-gradient(#fff,#ffd6d6);
+
+}
+.navbar {
+    padding-left: 20px;
+}
+
+.navbar .active {
     background-color: #69f1bf;
 }
-.navbar .profile{
+
+.navbar .profile {
     margin-left: 5px
 }
-.mobile-navbar{
+
+.mobile-navbar {
     background-color: #69f1bf;
     justify-content: space-between;
 }
-.mobile-profile{
+
+.mobile-profile {
     margin-right: 10px;
+}
+
+#addproductbox {
+    padding: 20px;
+}
+.proddisc .MuiTextField-root{
+    width: 100% !important;
+}
+.table-container{
+    width: 70vw !important;
+    margin: auto;
+    margin-top: 20px;
 }

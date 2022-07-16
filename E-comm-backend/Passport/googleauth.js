@@ -1,6 +1,6 @@
 const passport = require('passport');
 const Googlekey = require('./keys');
-const User = require('../Userschema');
+const User = require('../Database/Userschema');
 // ============Google Authentication===================
 
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
