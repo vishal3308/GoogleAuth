@@ -4,12 +4,13 @@ import TextField from '@mui/material/TextField';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import Alert from '@mui/material/Alert';
+
 import { Url } from '../App';
 
 export default function Addproduct() {
     const url = useContext(Url);
-    const [Error, setError] = useState('')
-    const [messagecolor, setmessagecolor] = useState('#81ed30')
+    const [Error, setError] = useState(0)
     const [Addbutton, setAddbutton] = useState(false)
     const [values, setValues] = useState({
         productname: '',
@@ -27,7 +28,7 @@ export default function Addproduct() {
     const Formsubmit = (e) => {
         e.preventDefault();
         setAddbutton(true)
-        // ===================API calling=============
+// ===================API calling for Adding New Product=====================
         const token = localStorage.getItem('E-comm_token');
         fetch(url + '/addproduct', {
             method: 'post',
@@ -39,12 +40,10 @@ export default function Addproduct() {
         }).then((resp) => resp.json())
             .then((res) => {
                 if (res.Error) {
-                    setmessagecolor('#f10a0a')
                     setError(res.Error);
                 }
                 else {
-                    setError(res.Message);
-                    setmessagecolor('#81ed30')
+                    setError(1);
                     setValues({
                         productname: '',
                         quantity: 1,
@@ -57,14 +56,19 @@ export default function Addproduct() {
 
                 }
             }).catch((err) => {
-                setmessagecolor('#f10a0a')
-                setError("Something went Wrong, please try again.")
+                setError(err.message)
             }).finally(() => {
                 setAddbutton(false)
             })
     }
     return (
         <>
+        <div style={{ marginTop: '5px',display: 'flex', justifyContent: 'center', }}>
+                {Error === 0 ? '' : Error === 1 ?
+                    <Alert severity="success" variant="outlined">Product Added successfully— check out Product List</Alert> :
+                    <Alert severity="error" variant="outlined">{Error}</Alert>
+                }
+            </div>
             <Box
                 sx={{
                     display: 'flex',
@@ -91,30 +95,30 @@ export default function Addproduct() {
                 }}
                 id='addproductbox'
             >
-                <div>
-                    <TextField label="Product Name" className='input-field' id="outlined-size-small" size="small" color="secondary" required
+               <div>
+                    <TextField label="Product Name" id="outlined-size-small" size="small" color="secondary" required
                         error={false}
                         helperText=""
                         value={values.productname}
                         onChange={handleChange('productname')} />
-                    <TextField id="outlined-number" label="Quantity" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField id="outlined-number" label="Quantity" size="small" type="number" required InputLabelProps={{ shrink: true, }} color="secondary"
                         value={values.quantity}
                         onChange={handleChange('quantity')} />
                 </div>
                 <div>
-                    <TextField label="Actual Price" className='input-field' size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField label="Actual Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary" required
                         value={values.actualprice}
                         onChange={handleChange('actualprice')}
                     />
-                    <TextField id="outlined-number" className='input-field' label="selling Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField label="selling Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary" required
                         value={values.sellingprice}
                         onChange={handleChange('sellingprice')} />
                 </div>
                 <div>
-                    <TextField className='input-field' label="Category" size="small" color="secondary" required
+                    <TextField label="Category" size="small" color="secondary" required
                         value={values.category}
                         onChange={handleChange('category')} />
-                    <TextField className='input-field' label="Brand/Company" size="small" color="secondary" required
+                    <TextField label="Brand/Company" size="small" color="secondary" required
                         value={values.brand}
                         onChange={handleChange('brand')} />
                 </div>
@@ -123,7 +127,6 @@ export default function Addproduct() {
                         sx={{ width: '100%' }}
                         required
                         id="outlined-multiline-flexible"
-                        className='input-field'
                         label="Product Description"
                         multiline
                         rows={5}
@@ -134,14 +137,12 @@ export default function Addproduct() {
                     />
                 </div>
                 <div>
-                    <button type='submit' disabled={Addbutton} style={{ border: 'none', marginBottom: '5px' }}>
-                        <Fab variant="extended" color="secondary" disabled={Addbutton}>
-                            Add
+                        <Fab variant="extended" color="secondary" disabled={Addbutton} type='submit'>
+                            ADD
                             <AddIcon sx={{ ml: 1 }} />
                         </Fab>
-                    </button>
                 </div>
-                <Box sx={{ color: messagecolor }}>{Error}</Box>
+                
             </Box>
         </>
     )

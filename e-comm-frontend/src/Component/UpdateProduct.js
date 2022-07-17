@@ -4,6 +4,7 @@ import TextField from '@mui/material/TextField';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import Alert from '@mui/material/Alert';
 import { Url } from '../App';
 import { useParams } from 'react-router';
 
@@ -11,8 +12,7 @@ export default function Addproduct() {
     const url = useContext(Url);
     const token = localStorage.getItem('E-comm_token');
     const { id } = useParams()
-    const [Error, setError] = useState('')
-    const [messagecolor, setmessagecolor] = useState('#81ed30')
+    const [Error, setError] = useState(0)
     const [Addbutton, setAddbutton] = useState(false)
     const [values, setValues] = useState({
         productname: '',
@@ -22,7 +22,7 @@ export default function Addproduct() {
         category: '',
         brand: '',
         description: '',
-        productid:id
+        productid: id
     });
     // =============First API Calling for Previous Record ============
     useEffect(() => {
@@ -36,27 +36,24 @@ export default function Addproduct() {
         }).then(resp => resp.json())
             .then((response) => {
                 if (response.Error) {
-                    setmessagecolor('#f10a0a')
                     setError(response.Error);
                 }
                 else {
-                    setError("");
-                    setmessagecolor('#81ed30')
+                    setError(0);
                     setValues({
                         productname: response.product.productname,
-                        quantity:response.product.quantity,
-                        actualprice:response.product.actualprice,
-                        sellingprice:response.product.sellingprice,
+                        quantity: response.product.quantity,
+                        actualprice: response.product.actualprice,
+                        sellingprice: response.product.sellingprice,
                         category: response.product.category,
                         brand: response.product.brand,
                         description: response.product.description,
-                        productid:id
+                        productid: id
                     })
-                    
+
                 }
             }).catch(err => {
-                setmessagecolor('#f10a0a')
-                setError("Something went Wrong, please try again.")
+                setError(err.message)
             })
     }, [])
     // ===========================================================
@@ -65,7 +62,7 @@ export default function Addproduct() {
     };
     const Formsubmit = (e) => {
         e.preventDefault();
-        setAddbutton(true)
+        setAddbutton(true);
         // ===================API calling for Updating new record=============
         fetch(url + '/updateproduct', {
             method: 'post',
@@ -77,30 +74,33 @@ export default function Addproduct() {
         }).then((resp) => resp.json())
             .then((res) => {
                 if (res.Error) {
-                    setmessagecolor('#f10a0a')
                     setError(res.Error);
                 }
                 else {
-                    setError(res.Message);
-                    setmessagecolor('#81ed30')
+                    setError(1);
                 }
             }).catch((err) => {
-                setmessagecolor('#f10a0a')
-                setError("Something went Wrong, please try again.")
+                setError(err.message)
             }).finally(() => {
                 setAddbutton(false)
             })
     }
     return (
         <>
+            <div style={{ marginTop: '5px',display: 'flex', justifyContent: 'center', }}>
+                {Error == 0 ? '' : Error == 1 ?
+                    <Alert severity="success" variant="outlined">Product Updated successfully— check it out!</Alert> :
+                    <Alert severity="error" variant="outlined">{Error}</Alert>
+                }
+            </div>
             <Box
                 sx={{
                     display: 'flex',
                     justifyContent: 'center',
                     marginTop: '20px',
-                    color:'#9b07ad'
+                    color: '#9b07ad'
                 }}>
-                ADD PRODUCT <AddShoppingCartIcon sx={{ ml: 1 }} color="secondary"/>
+                UPDATE PRODUCT <AddShoppingCartIcon sx={{ ml: 1 }} color="secondary" />
             </Box>
 
             <Box
@@ -120,29 +120,33 @@ export default function Addproduct() {
                 id='addproductbox'
             >
                 <div>
-                    <TextField label="Product Name" className='input-field' id="outlined-size-small" size="small" color="secondary" required
+                    <TextField label="Product Id" disabled size="small" color="secondary" defaultValue={values.productid}
+                    />
+                </div>
+                <div>
+                    <TextField label="Product Name" id="outlined-size-small" size="small" color="secondary" required
                         error={false}
                         helperText=""
                         value={values.productname}
                         onChange={handleChange('productname')} />
-                    <TextField id="outlined-number" label="Quantity" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField id="outlined-number" label="Quantity" size="small" type="number" required InputLabelProps={{ shrink: true, }} color="secondary"
                         value={values.quantity}
                         onChange={handleChange('quantity')} />
                 </div>
                 <div>
-                    <TextField label="Actual Price" className='input-field' size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField label="Actual Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary" required
                         value={values.actualprice}
                         onChange={handleChange('actualprice')}
                     />
-                    <TextField id="outlined-number" className='input-field' label="selling Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary"
+                    <TextField label="selling Price" size="small" type="number" InputLabelProps={{ shrink: true, }} color="secondary" required
                         value={values.sellingprice}
                         onChange={handleChange('sellingprice')} />
                 </div>
                 <div>
-                    <TextField className='input-field' label="Category" size="small" color="secondary" required
+                    <TextField label="Category" size="small" color="secondary" required
                         value={values.category}
                         onChange={handleChange('category')} />
-                    <TextField className='input-field' label="Brand/Company" size="small" color="secondary" required
+                    <TextField label="Brand/Company" size="small" color="secondary" required
                         value={values.brand}
                         onChange={handleChange('brand')} />
                 </div>
@@ -151,7 +155,6 @@ export default function Addproduct() {
                         sx={{ width: '100%' }}
                         required
                         id="outlined-multiline-flexible"
-                        className='input-field'
                         label="Product Description"
                         multiline
                         rows={5}
@@ -162,14 +165,12 @@ export default function Addproduct() {
                     />
                 </div>
                 <div>
-                    <button type='submit' disabled={Addbutton} style={{ border: 'none', marginBottom: '5px' }}>
-                        <Fab variant="extended" color="secondary" disabled={Addbutton}>
-                            UPDATE
-                            <AddIcon sx={{ ml: 1 }} />
-                        </Fab>
-                    </button>
+                    <Fab variant="extended" color="secondary" disabled={Addbutton} type='submit'>
+                        UPDATE
+                        <AddIcon sx={{ ml: 1 }} />
+                    </Fab>
                 </div>
-                <Box sx={{ color: messagecolor }}>{Error}</Box>
+
             </Box>
         </>
     )

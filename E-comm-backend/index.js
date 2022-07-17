@@ -31,7 +31,7 @@ const verifyingJWT=(req,resp,next)=>{
   const token=req.headers['authorization'];
   jwt.verify(token,jwtkey,(err,valid)=>{
     if(err){
-      resp.send({Error:err.message+", Please login again."})
+      resp.status(401).send({Error:err.message+", Please login again."})
     }
     else{
       req.body.userid=valid.user._id;
@@ -72,18 +72,22 @@ app.post('/signup',async(req,resp)=>{
     let Email=req.body.email;
     let userExist=await User.findOne({email:Email});
     if(userExist){
-        resp.send({Error:"Email id is already exist, please login with Email and Password"});
+        resp.status(409).send({Error:"Email id is already exist, please login with Email and Password"});
     }
     else{
         const data=new User(req.body);
-        let user=await data.save();
+        let user=await data.save().then((result)=>{
+          return result;
+        }).catch(err=>{
+          resp.status(403).send({Error:err.message})
+        });
         user=user.toObject();
         delete user.password;
         jwt.sign({user},jwtkey,{expiresIn:Math.floor(Date.now() / 1000) + (60 * 60)},(err,token)=>{
             if(err){
-                resp.send({Error:'Something went wrong'})
+                resp.status(401).send({Error:'Something went wrong'})
             }
-            resp.send({user,auth:token,Error:false})
+            resp.status(200).send({user,auth:token,Error:false})
         })
 
     }
@@ -99,11 +103,11 @@ app.post('/login',async(req,resp)=>{
             if(err){
                 resp.status(401).send({Error:'Something went wrong.'})
             }
-            resp.send({user,auth:token,Error:false})
+            resp.status(200).send({user,auth:token,Error:false})
         })
     }
     else{
-        resp.send({Error:'Email or password is wrong.'})
+        resp.status(401).send({Error:'Email or password is wrong.'})
     }
 })
 // ======================================== Add product====================
@@ -124,37 +128,66 @@ app.post('/addproduct',verifyingJWT,async(req,resp)=>{
       resp.status(200).send({Products:productlist})
     }
     else{
-      resp.status(401).send({Error:'You have not added any product for sell.'})
+      resp.status(404).send({Error:'You have not added any product for sell.'})
     }
   })
 
   // ========================= Getting single Product info for updating ===================
   app.post('/productinfo',verifyingJWT,async(req,resp)=>{
     const userId=req.body.userid;
-    const product=await Product.findOne({$and:[{_id:req.body.productid},{userid:userId}]},{userid:0});
-    // if(product){
-    //   console.log(product)
-    // }
-    resp.send({product:product})
+    await Product.findOne({$and:[{_id:req.body.productid},{userid:userId}]},{userid:0})
+    .then((result)=>{
+      if(result){
+        resp.status(200).send({product:result})
+      }
+      else{
+        resp.status(404).send({Error:"Failed to fetch product details"})
+      }
+  
+    }).catch(err=>{
+      resp.status(401).send({Error:"Either Product Id or something is wrong."})
+    });
   })
   // =========================Product updating ===================
   app.post('/updateproduct',verifyingJWT,async(req,resp)=>{
     const data=req.body;
-    let update=await Product.updateOne({$and:[{_id:req.body.productid},{userid:req.body.userid}]},{$set:data})
-    if(update.acknowledged){
-      resp.send({Message:"Successfully Updated"})
-    }
-    else{
-      resp.send({Error:"Update Failed, please try again."})
-    }
+    await Product.updateOne({$and:[{_id:req.body.productid},{userid:req.body.userid}]},{$set:data})
+    .then((result)=>{
+      if(result.acknowledged){
+        resp.status(200).send({Message:"Successfully Updated"})
+      }
+      else{
+        resp.status(404).send({Error:"Update Failed, please try again."})
+      }
+  
+    }).catch(err=>{
+      resp.status(401).send({Error:err.message})
+    });
   })
+  // ======================= Deleting Product ==================
+  app.post('/deleteproduct',verifyingJWT,async(req,resp)=>{
+    
+    await Product.deleteOne({$and:[{_id:req.body.productid},{userid:req.body.userid}]})
+    .then((result)=>{
+      if(result.deletedCount){
+        resp.status(200).send({Message:"Successfully Deleted"})
+      }
+      else{
+        resp.status(404).send({Error:"Deletion Failed, please try again."})
+      }
+  
+    }).catch(err=>{
+      resp.status(401).send({Error:err.message})
+    });
+  })
+  
 
 // ========================================= Logout ===========
 app.get('/logout',(req,resp)=>{
     req.logout(()=>{
       console.log('Logged out !!')
     });
-    resp.send('Successfully logout');
+    resp.status(200).send('Successfully logout');
 })
 
 app.listen(PORT);

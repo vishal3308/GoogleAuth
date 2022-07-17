@@ -20,6 +20,12 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
+
 import { Tooltip } from '@mui/material';
 import { Url } from '../App';
 
@@ -123,6 +129,43 @@ export default function CustomPaginationActionsTable() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  // ==================Delete Product Warning Dialog================
+  const [open, setOpen] = React.useState(false);
+  const [productid, setproductid] = React.useState("");
+  const [deleteinfo, setdeleteinfo] = React.useState("");
+
+  const handleClickOpen = (id) => {
+    setOpen(true);
+    setproductid(id);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  // ==================Delete Product API Callling=============
+  const DeleteProduct = () => {
+    fetch(url + '/deleteproduct', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      },
+      body: JSON.stringify({ productid: productid })
+    }).then((resp) => resp.json())
+      .then((res) => {
+        if (res.Error) {
+          setdeleteinfo(res.Error);
+        }
+        else {
+          setdeleteinfo(res.Message);
+        }
+      }).catch((err) => {
+        setdeleteinfo(err.message);
+      }).finally(() => {
+        setOpen(false);
+      })
+  }
+
   // ========================API Calling for Data ===========
 
   React.useEffect(() => {
@@ -145,7 +188,7 @@ export default function CustomPaginationActionsTable() {
       }).catch(err => {
         setError(err.message)
       })
-  }, [])
+  })
 
   return (
     <TableContainer component={Paper} className="table-container">
@@ -156,6 +199,7 @@ export default function CustomPaginationActionsTable() {
             <StyledTableCell align="right">Brand</StyledTableCell>
             <StyledTableCell align="right">Category</StyledTableCell>
             <StyledTableCell align="right">Quantity</StyledTableCell>
+            <StyledTableCell align="right">Original Price</StyledTableCell>
             <StyledTableCell align="right">Selling Price</StyledTableCell>
             <StyledTableCell align="right">Action</StyledTableCell>
           </TableRow>
@@ -170,11 +214,12 @@ export default function CustomPaginationActionsTable() {
               <StyledTableCell > {row.productname}</StyledTableCell>
               <StyledTableCell align="right">{row.brand}</StyledTableCell>
               <StyledTableCell align="right">{row.category}</StyledTableCell>
-              <StyledTableCell align="right">{row.quantity}</StyledTableCell>
-              <StyledTableCell align="right">{row.sellingprice}</StyledTableCell>
+              <StyledTableCell align="center">{row.quantity}</StyledTableCell>
+              <StyledTableCell align="center">{row.actualprice}</StyledTableCell>
+              <StyledTableCell align="center">{row.sellingprice}</StyledTableCell>
               <StyledTableCell align="right">
-              <Tooltip title="Edit Product"><Link to={"/updateproduct/"+row._id}><IconButton aria-label="edit" ><EditIcon color='primary' /></IconButton></Link></Tooltip>
-              <Tooltip title="Delete Product"><IconButton aria-label="delete" ><DeleteIcon color='secondary' /></IconButton></Tooltip>
+                <Tooltip title="Edit Product"><Link to={"/updateproduct/" + row._id}><IconButton aria-label="edit" ><EditIcon color='primary' /></IconButton></Link></Tooltip>
+                <Tooltip title="Delete Product"><IconButton aria-label="delete" onClick={() => handleClickOpen(row._id)}><DeleteIcon color='secondary' /></IconButton></Tooltip>
               </StyledTableCell>
             </StyledTableRow>
           ))}
@@ -207,9 +252,46 @@ export default function CustomPaginationActionsTable() {
         </TableFooter>
       </Table>
       {Error ?
-        <Box sx={{ textAlign: 'center', padding: '10px' }}>{Error}</Box> :
-        ""
+        <Alert severity="info" sx={{
+          width: "90%",
+          margin: "auto",
+          marginTop: "10px",
+          marginBottom: "10px",
+          backgroundColor: "rgb(185 227 245)"
+        }}>
+          {Error}</Alert>
+        : ""
       }
+      {deleteinfo ?
+        <Alert severity="info" sx={{
+          width: "90%",
+          margin: "auto",
+          marginTop: "10px",
+          marginBottom: "10px",
+          backgroundColor: "rgb(185 227 245)"
+        }}>
+          {deleteinfo}</Alert>
+        : ""
+      }
+      {/* ====================================== Delete Warning dialog============ */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure to delete"}
+        </DialogTitle>
+
+        <DialogActions>
+          <Button onClick={handleClose} autoFocus>No</Button>
+          <Button onClick={DeleteProduct} >
+            YES
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </TableContainer>
 
   );
