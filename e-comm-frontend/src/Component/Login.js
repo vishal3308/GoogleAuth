@@ -2,14 +2,16 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
 import GoogleIcon from '@mui/icons-material/Google';
 import SendIcon from '@mui/icons-material/Send';
-import React, { useContext, useEffect, useState} from "react";
+import LoginIcon from '@mui/icons-material/Login';
+import React, { useContext, useEffect, useState } from "react";
 import { Url } from '../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
+import Alert from '@mui/material/Alert';
 export default function Signup() {
     let navigate = useNavigate()
-    useEffect(()=>{
-        if(localStorage.getItem('E-comm_token')){
+    useEffect(() => {
+        if (localStorage.getItem('E-comm_token')) {
             console.log('login already done')
             navigate('/productlist')
         }
@@ -20,8 +22,8 @@ export default function Signup() {
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
     const url = useContext(Url);
-    function GoogleAuth(){
-        window.open('http://localhost:4000/auth/google',"_self")
+    function GoogleAuth() {
+        window.open('http://localhost:4000/auth/google', "_self")
     }
     function Sign_up(e) {
         e.preventDefault();
@@ -50,8 +52,10 @@ export default function Signup() {
                 }
                 else {
                     localStorage.setItem('E-comm_token', res.auth)
-                    localStorage.setItem('E-comm_name',res.user.name)
-                    localStorage.setItem('E-comm_email',res.user.email)
+                    localStorage.setItem('E-comm_name', res.user.name)
+                    localStorage.setItem('E-comm_email', res.user.email)
+                    localStorage.setItem('E-comm_avatar', res.avatar)
+
                     navigate('/productlist')
                 }
             }).catch((err) => {
@@ -65,7 +69,7 @@ export default function Signup() {
     return (
         <div className="login-wrap" style={{ backgroundImage: 'url(E-comm2.jpg)' }}>
             <div className="login-html">
-                <label htmlFor="tab-2" className="tab"> Login </label>
+                <label htmlFor="tab-2" className="tab"><LoginIcon sx={{ mr: 1 }} /> Login </label>
                 <form className="login-form" onSubmit={Sign_up}>
                     <div className="sign-up-htm">
                         <div className="group">
@@ -85,18 +89,20 @@ export default function Signup() {
                                 loadingPosition="end"
                                 variant="contained"
                                 type="submit"
-                                sx={{ color: 'rgb(245 237 237)',margin:'2px 5px' }}
+                                sx={{ color: 'rgb(245 237 237)', margin: '2px 5px' }}
                             >
                                 Login
                             </LoadingButton>
-                            
+
                             <Button variant="contained" className='google' onClick={GoogleAuth} color='success' size="small" startIcon={<GoogleIcon />}>
-                            Continue with Google
+                                Continue with Google
                             </Button>
-                            
+
                         </div>
                         <div className="group">
-                            {error && <label className="label erorr">* {errormassage}</label>}
+                            {error &&
+                                <Alert severity="error" >{errormassage}</Alert>
+                            }
                         </div>
                         <div className="hr"></div>
                         <div className="foot-lnk">

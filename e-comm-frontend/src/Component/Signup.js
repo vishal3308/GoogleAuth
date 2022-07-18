@@ -4,6 +4,8 @@ import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
 import GoogleIcon from '@mui/icons-material/Google';
 import Validator from 'validator';
+import Alert from '@mui/material/Alert';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { Url } from '../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
@@ -60,14 +62,15 @@ export default function Signup() {
             body: JSON.stringify(data)
         }).then((resp) => resp.json())
             .then((res) => {
-                if (res.status) {
+                if (res.Error) {
                     setError(true);
-                    setErrormassage(res.status)
+                    setErrormassage(res.Error);
                 }
                 else {
                     localStorage.setItem('E-comm_token', res.auth)
                     localStorage.setItem('E-comm_name', res.user.name)
                     localStorage.setItem('E-comm_email', res.user.email)
+                    localStorage.setItem('E-comm_avatar', res.avatar)
                     Navigate('/productlist')
                 }
             }).catch((err) => {
@@ -81,7 +84,7 @@ export default function Signup() {
     return (
         <div className="login-wrap" style={{ backgroundImage: 'url(E-comm2.jpg)' }}>
             <div className="login-html">
-                <label htmlFor="tab-2" className="tab">Sign Up</label>
+                <label htmlFor="tab-2" className="tab"><HowToRegIcon sx={{mr:1,marginTop:"2px"}}/>Sign Up</label>
                 <form className="login-form" onSubmit={Sign_up}>
                     <div className="sign-up-htm">
                         <div className="group">
@@ -93,7 +96,7 @@ export default function Signup() {
                             <input id="pass" type="password" className="input" onChange={(e) => setPassword(e.target.value)} value={password} data-type="password" autoComplete="true" required />
                         </div>
                         <div className="group">
-                            <label htmlFor="pass" className="label">Repeat Password</label>
+                            <label htmlFor="pass" className="label">Confirm Password</label>
                             <input type="text" className="input" onChange={(e) => setConfirmpass(e.target.value)} value={confirmpass} autoComplete="true" required />
                         </div>
                         <div className="group">
@@ -118,7 +121,9 @@ export default function Signup() {
 
                         </div>
                         <div className="group">
-                            {error && <label className="label erorr">* {errormassage}</label>}
+                        {error &&
+                            <Alert severity="error" >{errormassage}</Alert>
+                            }
                         </div>
                         <div className="hr"></div>
                         <div className="foot-lnk">

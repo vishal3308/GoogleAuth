@@ -13,7 +13,7 @@ passport.use(new GoogleStrategy({
     async (accessToken, refreshToken, profile, done) => {
         let data = {
             name: profile.displayName,
-            password: null,
+            password: "Vishalmaurya@8949",
             email: profile.emails[0].value,
             registration_type: 'Google',
             google_id: profile.id,
