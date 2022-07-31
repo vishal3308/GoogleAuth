@@ -25,7 +25,8 @@ import Tooltip from '@mui/material/Tooltip';
 import { useNavigate } from 'react-router-dom';
 import { Divider } from '@mui/material';
 export default function Navbar(props) {
-  let Auth = localStorage.getItem('E-comm_token')
+  let Auth = localStorage.getItem('E-comm_token');
+  const Profile_image=localStorage.getItem('E-comm_avatar');
   const [profile, setprofile] = React.useState('inline-flex');
   React.useEffect(() => {
     if (!Auth) {
@@ -34,7 +35,7 @@ export default function Navbar(props) {
     else {
       setprofile('inline-flex')
     }
-  })
+  },[Auth])
   let navigate = useNavigate()
   function logout() {
     localStorage.clear();
@@ -77,7 +78,7 @@ export default function Navbar(props) {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }} alt="Hi" src={localStorage.getItem('E-comm_avatar')} />
+            <Avatar sx={{ width: 32, height: 32 }} alt="Hi" src={Profile_image ? Profile_image : "/avatar.png"} />
           </IconButton>
         </Tooltip>
         <Menu

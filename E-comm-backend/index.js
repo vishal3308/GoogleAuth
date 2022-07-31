@@ -5,6 +5,7 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken');
 const User = require('./Database/Userschema');
 const Product = require('./Database/Productschema');
+const bcrypt = require('bcrypt')
 const jwtkey = 'e-commerce';
 const PORT = process.env.PORT || 4000;
 const PortalURL = 'http://localhost:3000'
@@ -24,7 +25,7 @@ app.use(passport.session());
 
 // =======================Home===================
 app.get('/', async (req, resp) => {
-  resp.redirect('/auth/google');
+  resp.send("Backend Home page");
 })
 // =========================== verifying JWT Token as Middleware==========
 const verifyingJWT = (req, resp, next) => {
@@ -70,10 +71,9 @@ app.get('/login/failure', (req, resp) => {
 // ================================== Sign up====================
 app.post('/signup', async (req, resp) => {
   const data = new User(req.body);
-   await data.save().then((result) => {
+  await data.save().then((result) => {
     let user = result.toObject();
     delete user.password;
-    delete user._id;
     jwt.sign({ user }, jwtkey, { expiresIn: Math.floor(Date.now() / 1000) + (60 * 60) }, (err, token) => {
       if (err) {
         resp.status(401).send({ Error: 'Something went wrong, please try again.' })
@@ -93,24 +93,34 @@ app.post('/signup', async (req, resp) => {
 app.post('/login', async (req, resp) => {
   let Email = req.body.email;
   let Password = req.body.password;
-  const method=await User.findOne({email:Email},{registration_type:1});
-  if(method.registration_type=='Local'){
-    const user = await User.findOne({ $and: [{ email: Email }, { password: Password }] }, { _id:0,name:1, email:1, avatar:1 });
-    if (user) {
-      jwt.sign({ user }, jwtkey, { expiresIn: Math.floor(Date.now() / 1000) + (60 * 60) }, (err, token) => {
-        if (err) {
-          resp.status(401).send({ Error: 'Something went wrong.' })
+  let user = await User.findOne({ email: Email }, { registration_type: 1, password: 1,name: 1, email: 1, avatar: 1 });
+  if (user) {
+    if (user.registration_type == 'Local') {
+      const Hash_Pass = user.password;
+      await bcrypt.compare(Password, Hash_Pass).then(valid => {
+        if (valid) {
+          jwt.sign({ user }, jwtkey, { expiresIn: Math.floor(Date.now() / 1000) + (60 * 60) }, (err, token) => {
+            if (err) {
+              resp.status(401).send({ Error: 'Something went wrong.' })
+            }
+             user=user.toObject();
+            delete user.password;
+            delete user._id;
+            resp.status(200).send({ user, auth: token, Error: false })
+          })
         }
-        resp.status(200).send({ user, auth: token, Error: false })
-      })
+        else {
+          resp.status(401).send({ Error: 'Password is wrong.' })
+        }
+      }).catch(err=>resp.status(401).send({ Error: 'Server have some issue please try after some time.' }))
     }
     else {
-      resp.status(401).send({ Error: 'Email or password is wrong.' })
+      resp.status(401).send({ Error: "Please choose 'Continue with Google option'" })
     }
-
   }
-  else{
-    resp.status(401).send({Error:"Please choose 'Continue with Google option'"})
+  else {
+    resp.status(200).send({ Error: "Email Id is not found.'" })
+
   }
 })
 // ======================================== Add product====================
@@ -131,7 +141,7 @@ app.get('/productlist', verifyingJWT, async (req, resp) => {
     resp.status(200).send({ Products: productlist })
   }
   else {
-    resp.status(404).send({ Error: 'You have not added any product for sell.' })
+    resp.status(200).send({ Error: 'You have not added any product for sell.' })
   }
 })
 

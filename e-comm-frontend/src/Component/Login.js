@@ -12,7 +12,6 @@ export default function Signup() {
     let navigate = useNavigate()
     useEffect(() => {
         if (localStorage.getItem('E-comm_token')) {
-            console.log('login already done')
             navigate('/productlist')
         }
     })
@@ -54,7 +53,7 @@ export default function Signup() {
                     localStorage.setItem('E-comm_token', res.auth)
                     localStorage.setItem('E-comm_name', res.user.name)
                     localStorage.setItem('E-comm_email', res.user.email)
-                    localStorage.setItem('E-comm_avatar', res.avatar)
+                    localStorage.setItem('E-comm_avatar', res.user.avatar)
 
                     navigate('/productlist')
                 }

@@ -5,9 +5,26 @@ import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import Alert from '@mui/material/Alert';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import { Url } from '../App';
 import { useParams } from 'react-router';
 
+// =============== Category Section Component===============
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
+const category_list = ['Electronic', 'AutoMobile', 'Home Product',
+    'Game', 'Health', 'Excercise', 'Study', 'Entertainment','Mobile','Bike','TV'].sort();
 export default function Addproduct() {
     const url = useContext(Url);
     const token = localStorage.getItem('E-comm_token');
@@ -143,9 +160,25 @@ export default function Addproduct() {
                         onChange={handleChange('sellingprice')} />
                 </div>
                 <div>
-                    <TextField label="Category" size="small" color="secondary" required
-                        value={values.category}
-                        onChange={handleChange('category')} />
+                <FormControl required sx={{ m: 1, minWidth: 223 }}>
+                        <InputLabel id="demo-simple-select-required-label">Category</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-required-label"
+                            id="select-required"
+                            value={values.category}
+                            label="Category *"
+                            onChange={handleChange('category')}
+                            MenuProps={MenuProps}
+                        >
+                            <MenuItem value={"Other"}><em>Other</em></MenuItem>
+                            {category_list.map((item) => (
+                                <MenuItem key={item} value={item}>{item}</MenuItem>
+
+                            ))}
+
+                        </Select>
+                    </FormControl>
+
                     <TextField label="Brand/Company" size="small" color="secondary" required
                         value={values.brand}
                         onChange={handleChange('brand')} />

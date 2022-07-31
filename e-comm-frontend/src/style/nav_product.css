@@ -34,3 +34,6 @@ body{
     margin: auto;
     margin-top: 20px;
 }
+#select-required{
+    padding: 8px 14px !important;
+}
