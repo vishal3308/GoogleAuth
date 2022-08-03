@@ -6,6 +6,7 @@
 //     const db=client.db('e-commerce');
 //     return collection=db.collection('users')
 // }
-
+const dotenv=require('dotenv');
+dotenv.config();
 const mongoose=require('mongoose');
-module.exports=mongoose.connect('mongodb://localhost:27017/e-commerce');
+module.exports=mongoose.connect(process.env.MONGO_URL);

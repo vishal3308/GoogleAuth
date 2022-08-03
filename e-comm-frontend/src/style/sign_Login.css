@@ -62,11 +62,11 @@ a {
 
 .login-html .tab {
 	align-items: start;
-    font-size: 22px;
-    margin: 0 15px 10px 0px;
-    display: inline-block;
-    border: 1px solid #fff;
-    padding: 5px;
+	font-size: 22px;
+	margin: 0 15px 10px 0px;
+	display: inline-block;
+	border: 1px solid #fff;
+	padding: 5px;
 }
 
 .tab {
@@ -171,4 +171,25 @@ a {
 
 .foot-lnk label:hover {
 	color: #fff;
+}
+
+/* =======================OTP dialog */
+
+.OTPdialog input[type=number]::-webkit-inner-spin-button,
+.OTPdialog input[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+}
+
+.OTPdialog input[type=number] {
+	-moz-appearance: textfield;
+  }
+
+.OTPdialog #timer{
+	border: 1px solid grey;
+    margin: 0 5px;
+    color: darkslategrey;
+    font-weight: 200;
+    padding: 4px;
+    border-radius: 10px;
+    font-size: 15px;
 }

@@ -6,9 +6,10 @@ import GoogleIcon from '@mui/icons-material/Google';
 import Validator from 'validator';
 import Alert from '@mui/material/Alert';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import { Url } from '../App';
+import { Url } from '../../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
+import OtpVerification from "./OtpVerification";
 export default function Signup() {
     let Navigate = useNavigate()
     useEffect(()=>{
@@ -24,6 +25,7 @@ export default function Signup() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
+    const [Otpdialog, setOtpdialog]=useState(false);
     const url = useContext(Url);
     // ============Googe authentication window====
     function GoogleAuth(){
@@ -31,7 +33,9 @@ export default function Signup() {
     }
 // ==============Signup function Callling=============
     function Sign_up(e) {
+        console.log("Sign Up")
         e.preventDefault();
+        return setOtpdialog((preval)=>true)
         if (!email || !name || !password || !confirmpass) {
             return setError(true)
         }
@@ -132,6 +136,7 @@ export default function Signup() {
                     </div>
                 </form>
             </div>
+            <OtpVerification OPEN={Otpdialog} EMAIL={email}/>
         </div>
 
     )

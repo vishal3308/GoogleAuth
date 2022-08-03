@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes,Link } from 'react-router-dom';
 import PrivateComponent from './PrivateComponent';
 import Home from './Component/Home';
 import Navbar from './Component/Navbar';
-import Signup from './Component/Signup';
-import Login from './Component/Login';
+import Signup from './Component/Sign_Login/Signup';
+import Login from './Component/Sign_Login/Login';
 import Logout from './Component/Logout';
 import Authenticate from './Component/Authenticate';
 import Addproduct from './Component/Addproduct';
@@ -22,7 +22,7 @@ function App() {
         <BrowserRouter>
         <div className='logo'>
           <Link to="/">
-            <img src='Vishalstore.png' alt="logo"/>
+            <img src='/Vishalstore.png' alt="logo"/>
           </Link>
         </div>
           
