@@ -12,12 +12,12 @@ import { useNavigate } from 'react-router';
 import OtpVerification from "./OtpVerification";
 export default function Signup() {
     let Navigate = useNavigate()
-    useEffect(()=>{
-        if(localStorage.getItem('E-comm_token')){
+    useEffect(() => {
+        if (localStorage.getItem('E-comm_token')) {
             console.log('login already done')
             Navigate('/productlist')
         }
-    })
+    }, [])
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -25,17 +25,27 @@ export default function Signup() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
-    const [Otpdialog, setOtpdialog]=useState(false);
+    const [Otpdialog, setOtpdialog] = useState(false);
+    const [signupData, setsignupData] = useState('');
     const url = useContext(Url);
-    // ============Googe authentication window====
-    function GoogleAuth(){
-        window.open('http://localhost:4000/auth/google',"_self")
+
+    // ============Handle OTP Dialog Open and Close function through childcomponent and localstorage also ==============
+    const handleOTP = () => {
+        setOtpdialog(false);
     }
-// ==============Signup function Callling=============
+    const Setlocalstorage = () => {
+        localStorage.setItem('E-comm_token', signupData.auth)
+        localStorage.setItem('E-comm_name', signupData.user.name)
+        localStorage.setItem('E-comm_email', signupData.user.email)
+        localStorage.setItem('E-comm_avatar', signupData.user.avatar)
+    }
+    // ============Googe authentication window================
+    function GoogleAuth() {
+        window.open('http://localhost:4000/auth/google', "_self")
+    }
+    // ==============Signup function Callling=============
     function Sign_up(e) {
-        console.log("Sign Up")
         e.preventDefault();
-        return setOtpdialog((preval)=>true)
         if (!email || !name || !password || !confirmpass) {
             return setError(true)
         }
@@ -71,11 +81,8 @@ export default function Signup() {
                     setErrormassage(res.Error);
                 }
                 else {
-                    localStorage.setItem('E-comm_token', res.auth)
-                    localStorage.setItem('E-comm_name', res.user.name)
-                    localStorage.setItem('E-comm_email', res.user.email)
-                    localStorage.setItem('E-comm_avatar', res.avatar)
-                    Navigate('/productlist')
+                    setsignupData(res)
+                    setOtpdialog((preval) => true)
                 }
             }).catch((err) => {
                 setError(true);
@@ -88,7 +95,7 @@ export default function Signup() {
     return (
         <div className="login-wrap" style={{ backgroundImage: 'url(E-comm2.jpg)' }}>
             <div className="login-html">
-                <label htmlFor="tab-2" className="tab"><HowToRegIcon sx={{mr:1,marginTop:"2px"}}/>Sign Up</label>
+                <label htmlFor="tab-2" className="tab"><HowToRegIcon sx={{ mr: 1, marginTop: "2px" }} />Sign Up</label>
                 <form className="login-form" onSubmit={Sign_up}>
                     <div className="sign-up-htm">
                         <div className="group">
@@ -115,18 +122,18 @@ export default function Signup() {
                                 loadingPosition="end"
                                 variant="contained"
                                 type="submit"
-                                sx={{ color: 'rgb(245 237 237)',margin:'2px 5px' }}
+                                sx={{ color: 'rgb(245 237 237)', margin: '2px 5px' }}
                             >
                                 Sign Up
                             </LoadingButton>
                             <Button variant="contained" className='google' onClick={GoogleAuth} color='success' size="small" startIcon={<GoogleIcon />}>
-                               Continue with Google
+                                Continue with Google
                             </Button>
 
                         </div>
                         <div className="group">
-                        {error &&
-                            <Alert severity="error" >{errormassage}</Alert>
+                            {error &&
+                                <Alert severity="error" >{errormassage}</Alert>
                             }
                         </div>
                         <div className="hr"></div>
@@ -136,7 +143,8 @@ export default function Signup() {
                     </div>
                 </form>
             </div>
-            <OtpVerification OPEN={Otpdialog} EMAIL={email}/>
+            {Otpdialog && <OtpVerification HandleOTP={handleOTP} EMAIL={email} Setlocalstorage={Setlocalstorage} />}
+
         </div>
 
     )

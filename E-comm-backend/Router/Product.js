@@ -19,7 +19,7 @@ const verifyingJWT = (req, resp, next) => {
     })
   }
 //   ================= Product API==================
-router.post('/addproduct', verifyingJWT, async (req, resp) => {
+router.post('/api/addproduct', verifyingJWT, async (req, resp) => {
     const Addproduct = new Product(req.body);
     await Addproduct.save().then((result) => {
       resp.status(200).send({ Message: "Successfully Added" });
@@ -30,7 +30,7 @@ router.post('/addproduct', verifyingJWT, async (req, resp) => {
   })
   
   // ============================ Product list of only particular User===========
-  router.get('/productlist', verifyingJWT, async (req, resp) => {
+  router.get('/api/productlist', verifyingJWT, async (req, resp) => {
     const productlist = await Product.find({ userid: req.body.userid }, { userid: 0 })
     if (productlist.length > 0) {
       resp.status(200).send({ Products: productlist })
@@ -41,7 +41,7 @@ router.post('/addproduct', verifyingJWT, async (req, resp) => {
   })
   
   // ========================= Getting single Product info for updating ===================
-  router.post('/productinfo', verifyingJWT, async (req, resp) => {
+  router.post('/api/productinfo', verifyingJWT, async (req, resp) => {
     const userId = req.body.userid;
     await Product.findOne({ $and: [{ _id: req.body.productid }, { userid: userId }] }, { userid: 0 })
       .then((result) => {
@@ -57,7 +57,7 @@ router.post('/addproduct', verifyingJWT, async (req, resp) => {
       });
   })
   // =========================Product updating ===================
-  router.post('/updateproduct', verifyingJWT, async (req, resp) => {
+  router.post('/api/updateproduct', verifyingJWT, async (req, resp) => {
     const data = req.body;
     await Product.updateOne({ $and: [{ _id: req.body.productid }, { userid: req.body.userid }] }, { $set: data })
       .then((result) => {
@@ -73,7 +73,7 @@ router.post('/addproduct', verifyingJWT, async (req, resp) => {
       });
   })
   // ======================= Deleting Product ==================
-  router.post('/deleteproduct', verifyingJWT, async (req, resp) => {
+  router.post('/api/deleteproduct', verifyingJWT, async (req, resp) => {
   
     await Product.deleteOne({ $and: [{ _id: req.body.productid }, { userid: req.body.userid }] })
       .then((result) => {

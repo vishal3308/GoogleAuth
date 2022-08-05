@@ -23,13 +23,13 @@ const userSchema = new mongoose.Schema({
     },
     registration_date: {
         type: String,
-        default: new Date().toISOString()
+        default: new Date()
+    },
+    Account_status: {
+        type: Boolean,
+        default: false
     },
     Account: {
-        status: {
-            type: Boolean,
-            default: false
-        },
         OTP: {
             type: Number,
             default:Math.floor(Math.random()*1000000)

@@ -18,7 +18,7 @@ export const Url = createContext();
 function App() {
   return (
     <div className="wrapper">
-      <Url.Provider value={'http://localhost:4000'}>
+      <Url.Provider value={'http://localhost:4000/api'}>
         <BrowserRouter>
         <div className='logo'>
           <Link to="/">
