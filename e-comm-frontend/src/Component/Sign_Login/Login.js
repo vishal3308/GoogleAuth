@@ -8,18 +8,21 @@ import { Url } from '../../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 import Alert from '@mui/material/Alert';
+import OtpVerification from './OtpVerification';
 export default function Signup() {
     let navigate = useNavigate()
     useEffect(() => {
         if (localStorage.getItem('E-comm_token')) {
             navigate('/productlist')
         }
-    })
+    }, [])
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [error, setError] = useState(false);
     const [errormassage, setErrormassage] = useState(false);
+    const [Otpdialog, setOtpdialog] = useState(false);
+    const [signupData, setsignupData] = useState('');
     const url = useContext(Url);
     function GoogleAuth() {
         window.open('http://localhost:4000/auth/google', "_self")
@@ -50,12 +53,17 @@ export default function Signup() {
                     setErrormassage(res.Error)
                 }
                 else {
-                    localStorage.setItem('E-comm_token', res.auth)
-                    localStorage.setItem('E-comm_name', res.user.name)
-                    localStorage.setItem('E-comm_email', res.user.email)
-                    localStorage.setItem('E-comm_avatar', res.user.avatar)
-
-                    navigate('/productlist')
+                    if (res.otp) {
+                        setsignupData(res)
+                        setOtpdialog((preval) => true)
+                    }
+                    else {
+                        localStorage.setItem('E-comm_token', res.auth)
+                        localStorage.setItem('E-comm_name', res.user.name)
+                        localStorage.setItem('E-comm_email', res.user.email)
+                        localStorage.setItem('E-comm_avatar', res.user.avatar)
+                        navigate('/productlist')
+                    }
                 }
             }).catch((err) => {
                 setError(true);
@@ -63,6 +71,16 @@ export default function Signup() {
             }).finally(() => {
                 setLoading(false)
             })
+    }
+    // ============Handle localstorage from child component , handleOTP fun will make OTP dialog ope and close ==============
+    const handleOTP = () => {
+        setOtpdialog(false);
+    }
+    const Setlocalstorage = () => {
+        localStorage.setItem('E-comm_token', signupData.auth)
+        localStorage.setItem('E-comm_name', signupData.user.name)
+        localStorage.setItem('E-comm_email', signupData.user.email)
+        localStorage.setItem('E-comm_avatar', signupData.user.avatar)
     }
 
     return (
@@ -110,6 +128,8 @@ export default function Signup() {
                     </div>
                 </form>
             </div>
+            {Otpdialog && <OtpVerification HandleOTP={handleOTP} EMAIL={email} Setlocalstorage={Setlocalstorage} />}
+
         </div>
 
     )

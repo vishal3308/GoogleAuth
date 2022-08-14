@@ -68,12 +68,13 @@ router.post('/api/signup', async (req, resp) => {
 router.post('/api/login', async (req, resp) => {
   let Email = req.body.email;
   let Password = req.body.password;
-  let user = await User.findOne({ email: Email }, { registration_type: 1, password: 1, name: 1, email: 1, avatar: 1 });
+  let user = await User.findOne({ email: Email }, { registration_type: 1, password: 1, name: 1, email: 1, avatar: 1,Account_status:1 });
   if (user) {
     if (user.registration_type == 'Local') {
       const Hash_Pass = user.password;
-      await bcrypt.compare(Password, Hash_Pass).then(valid => {
+      await bcrypt.compare(Password, Hash_Pass).then(async(valid) => {
         if (valid) {
+          
           jwt.sign({ user }, jwtkey, { expiresIn: Math.floor(Date.now() / 1000) + (60 * 60) }, (err, token) => {
             if (err) {
               resp.status(401).send({ Error: 'Something went wrong.' })
@@ -81,7 +82,11 @@ router.post('/api/login', async (req, resp) => {
             user = user.toObject();
             delete user.password;
             delete user._id;
-            resp.status(200).send({ user, auth: token, Error: false })
+            if(!user.Account_status){
+              resp.status(200).send({ user, auth: token, Error: false,otp:true })
+            }else{
+              resp.status(200).send({ user, auth: token, Error: false ,otp:false })
+            }
           })
         }
         else {
@@ -108,23 +113,23 @@ router.post('/api/Otpverification', async (req, resp) => {
         resp.status(200).send({ Error: "Your account is already verified." })
       }
       else {
-        let Expiretime=new Date(userExist.Account.Expire);
-        if(Expiretime - new Date() >0){
+        let Expiretime = new Date(userExist.Account.Expire);
+        if (Expiretime - new Date() > 0) {
           if (userExist.Account.OTP == req.body.OTP) {
-            await User.updateOne({_id:userExist._id},{$set:{Account_status:true,Account:null}})
-            .then((acknowleadge)=>{
-              if(acknowleadge.modifiedCount >0) resp.status(200).send({ Message:"OTP Verified",Error: false })
-              else{
-                resp.status(401).send({Error:"Something went wrong please try again"})
-              } 
-            }).catch(err=>resp.status(401).send({Error:"Something went wrong please try again"}))
+            await User.updateOne({ _id: userExist._id }, { $set: { Account_status: true, Account: null } })
+              .then((acknowleadge) => {
+                if (acknowleadge.modifiedCount > 0) resp.status(200).send({ Message: "OTP Verified", Error: false })
+                else {
+                  resp.status(401).send({ Error: "Something went wrong please try again" })
+                }
+              }).catch(err => resp.status(401).send({ Error: "Something went wrong please try again" }))
           }
-          else{
-          resp.status(200).send({ Error: "Wrong OTP please enter correct OTP" })
+          else {
+            resp.status(200).send({ Error: "Wrong OTP please enter correct OTP" })
           }
         }
-        else{
-          resp.status(200).send({ Error: "Your OTP is Expired" })
+        else {
+          resp.status(200).send({ Error: "Your OTP is Expired, please Resend OTP" })
         }
       }
     }
@@ -134,5 +139,35 @@ router.post('/api/Otpverification', async (req, resp) => {
   })
 })
 
+// ======================== Resend OTP API ======================
+router.post('/api/resendotp', async (req, resp) => {
+  const Email = req.body.email;
+  const New_OTP = Math.floor(Math.random() * 1000000);
+  await User.findOne({ email: Email }).then(async (userExist) => {
+    if (userExist) {
+      if (userExist.Account_status) {
+        resp.status(200).send({ Error: "Your account is already verified." })
+      }
+      else {
+        await User.updateOne({ _id: userExist._id }, { $set: { "Account.OTP": New_OTP, "Account.Expire": Date.now() + 10 * 60 * 1000 } })
+          .then(async (acknowleadge) => {
+            if (acknowleadge.modifiedCount > 0) {
+              await Send_Mail(Email, New_OTP).then((mail) => {
+                resp.status(200).send({ Message: "OTP Sent successfully.", Error: false })
+              })
+              .catch(err=>resp.status(403).send({ Error: "Failed to send Email for OTP verification" }))
+
+              } 
+              else {
+                  resp.status(401).send({ Error: "OTP generation failed" })
+                } 
+            }).catch(err => resp.status(401).send({ Error: err.message }))
+      }
+    }
+    else {
+      resp.status(200).send({ Error: "User doesn't exist please signup" })
+    }
+  })
+})
 
 module.exports = router

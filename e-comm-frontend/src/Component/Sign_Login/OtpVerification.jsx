@@ -10,11 +10,12 @@ import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
 import { Tooltip } from '@mui/material';
 import { Url } from '../../App';
 
 
-export default function OtpVerification({ HandleOTP, EMAIL,Setlocalstorage }) {
+export default function OtpVerification({ HandleOTP, EMAIL, Setlocalstorage }) {
   const [open, setopen] = useState(true);
   const [resendloading, setresendLoading] = useState(false);
   const [Resendbutton, setResend] = useState(true);
@@ -23,18 +24,19 @@ export default function OtpVerification({ HandleOTP, EMAIL,Setlocalstorage }) {
   const [otp, setotp] = useState('');
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setsuccessMessage] = useState('');
 
   const navigate = useNavigate()
   const url = useContext(Url);
 
   useEffect(() => {
-      setopen(true);
-      setResend(true);
-      return settimer(30);
-    
-  },[EMAIL])
+    setopen(true);
+    setResend(true);
+    return settimer(30);
 
-  const handleclose=()=>{
+  }, [EMAIL])
+
+  const handleclose = () => {
     setopen(false);
     HandleOTP();
   }
@@ -74,10 +76,37 @@ export default function OtpVerification({ HandleOTP, EMAIL,Setlocalstorage }) {
       })
 
   };
-
+  // =================================Resend OTP API CAlling=================
   const ResendOtp = () => {
-    console.log('Email id: ', EMAIL);
-    setresendLoading(true)
+    setresendLoading(true);
+    const data = {
+      email: EMAIL,
+    }
+    fetch(url + '/resendotp', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    }).then((resp) => resp.json())
+      .then((res) => {
+        if (res.Error) {
+          setError(true)
+          setErrorMessage(res.Error);
+          setResend(false);
+        }
+        else {
+          settimer(30);
+          setError(false);
+          setErrorMessage("");
+          setsuccessMessage("OTP send seccussfully, please check your Email");
+        }
+      }).catch((err) => {
+        setError(true)
+        setErrorMessage("Something went Wrong, please try again.");
+      }).finally(() => {
+        setresendLoading(false)
+      })
   }
   // ==========Timer for Resend OTP=====================
   useEffect(() => {
@@ -95,10 +124,11 @@ export default function OtpVerification({ HandleOTP, EMAIL,Setlocalstorage }) {
 
   return (
     <Dialog open={open} className="OTPdialog">
+      {successMessage &&<Alert severity="success" open>{successMessage}</Alert>}
       <Tooltip title="Close">
-      <IconButton aria-label="delete" size="large" sx={{position:"absolute",right:0,top:0}} onClick={handleclose}>
-        <CloseIcon />
-      </IconButton>
+        <IconButton aria-label="delete" size="large" sx={{ position: "absolute", right: 0, top: 0 }} onClick={handleclose}>
+          <CloseIcon />
+        </IconButton>
       </Tooltip>
       <DialogTitle>OTP Verification</DialogTitle>
       <DialogContent>
