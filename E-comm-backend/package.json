@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "body-parser": "^1.20.0",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
@@ -22,6 +23,7 @@
     "mongodb": "^4.7.0",
     "mongoose": "^6.4.2",
     "mongoose-findorcreate": "^3.0.0",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.7.7",
     "nodemon": "^2.0.19",
     "passport": "^0.6.0",

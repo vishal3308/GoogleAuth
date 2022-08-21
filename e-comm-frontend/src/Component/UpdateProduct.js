@@ -9,8 +9,12 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Tooltip from '@mui/material/Tooltip';
 import { Url } from '../App';
 import { useParams } from 'react-router';
+const axios = require('axios')
 
 // =============== Category Section Component===============
 const ITEM_HEIGHT = 48;
@@ -24,7 +28,7 @@ const MenuProps = {
     },
 };
 const category_list = ['Electronic', 'AutoMobile', 'Home Product',
-    'Game', 'Health', 'Excercise', 'Study', 'Entertainment','Mobile','Bike','TV'].sort();
+    'Game', 'Health', 'Excercise', 'Study', 'Entertainment', 'Mobile', 'Bike', 'TV'].sort();
 export default function Addproduct() {
     const url = useContext(Url);
     const token = localStorage.getItem('E-comm_token');
@@ -41,6 +45,10 @@ export default function Addproduct() {
         description: '',
         productid: id
     });
+    const [APIimagesURL, setAPIImagesURL] = useState([]);
+    const [images, setImages] = useState([]);
+    const [imagesURL, setImagesURL] = useState([]);
+    const [imageStatus,setimageStatus]=useState(false)
     // =============First API Calling for Previous Record ============
     useEffect(() => {
         fetch(url + '/productinfo', {
@@ -67,44 +75,110 @@ export default function Addproduct() {
                         description: response.product.description,
                         productid: id
                     })
+                    setAPIImagesURL(response.product.images)
 
                 }
             }).catch(err => {
                 setError(err.message)
             })
-    }, [])
+    }, [imageStatus])
     // ===========================================================
     const handleChange = (prop) => (event) => {
         setValues({ ...values, [prop]: event.target.value });
     };
-    const Formsubmit = (e) => {
-        e.preventDefault();
-        setAddbutton(true);
-        // ===================API calling for Updating new record=============
-        fetch(url + '/updateproduct', {
+    const DeleteImageAPI = (ImgName,index) => {
+        let info = {
+            image: ImgName,
+            productid: id
+        }
+        axios({
             method: 'post',
+            url: url + '/deleteproduct_image',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': token
             },
-            body: JSON.stringify(values)
-        }).then((resp) => resp.json())
-            .then((res) => {
-                if (res.Error) {
-                    setError(res.Error);
-                }
-                else {
-                    setError(1);
-                }
-            }).catch((err) => {
-                setError(err.message)
-            }).finally(() => {
-                setAddbutton(false)
-            })
+            data: info
+        }).then(response => {
+            let res=response.data;
+            if(res.Error){
+                console.log(res.Error)
+            }
+            else{
+                setError(1);
+                setimageStatus(!imageStatus)
+                setAPIImagesURL((prev)=>prev.slice(index,1))
+            }
+        }).catch((err) => {
+            console.log(err.message)
+        }).finally(() => {
+            console.log('APIimage: ',APIimagesURL)
+        })
+    }
+    // ========= Local Image Handling which User Upload===========
+    const handleimages = (e) => {
+        setError(0)
+        let files = [...e.target.files];
+        console.log(images.length + files.length)
+        if (images.length + files.length > 5) {
+            setError('Maximum 5 images are allow.');
+            return;
+        }
+        setImages([...images, ...files])
+        new Promise((res, rej) => {
+            let result = [];
+            files.map(element => { return result.push(URL.createObjectURL(element)) })
+            res(result);
+        }).then(res => {
+            setImagesURL([...imagesURL, ...res]);
+        }
+        )
+    }
+    const deleteImage = (index) => {
+        let Imagelist = images;
+        Imagelist.splice(index, 1)
+        setImages([...Imagelist])
+        Imagelist = imagesURL;
+        Imagelist.splice(index, 1)
+        setImagesURL([...Imagelist])
+    }
+    // ===================API calling for Updating new record=============
+    const Formsubmit = (e) => {
+        e.preventDefault();
+        setAddbutton(true);
+        const formData = new FormData();
+        console.log(images)
+        images.map(img => {
+            formData.append('file', img);
+        })
+        for (const key in values) {
+            formData.append(key, values[key]);
+        }
+        axios({
+            method: 'post',
+            url: url + '/updateproduct',
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': token
+            },
+            data: formData
+        }).then((response) => {
+            let res = response.data;
+            if (res.Error) {
+                setError(res.Error);
+            }
+            else {
+                setError(1);
+            }
+        }).catch((err) => {
+            setError(err.message)
+        }).finally(() => {
+            setAddbutton(false)
+        })
     }
     return (
         <>
-            <div style={{ marginTop: '5px',display: 'flex', justifyContent: 'center', }}>
+            <div style={{ marginTop: '5px', display: 'flex', justifyContent: 'center', }}>
                 {Error == 0 ? '' : Error == 1 ?
                     <Alert severity="success" variant="outlined">Product Updated successfully— check it out!</Alert> :
                     <Alert severity="error" variant="outlined">{Error}</Alert>
@@ -160,7 +234,7 @@ export default function Addproduct() {
                         onChange={handleChange('sellingprice')} />
                 </div>
                 <div>
-                <FormControl required sx={{ m: 1, minWidth: 223 }}>
+                    <FormControl required sx={{ m: 1, minWidth: 223 }}>
                         <InputLabel id="demo-simple-select-required-label">Category</InputLabel>
                         <Select
                             labelId="demo-simple-select-required-label"
@@ -196,6 +270,41 @@ export default function Addproduct() {
                         onChange={handleChange('description')}
                         color="secondary"
                     />
+                </div>
+                <div className="product_image">
+                    <span>Previous Images</span>
+                    <input type="file" name="Product_image" multiple accept='image/*' onChange={(e) => handleimages(e)} />
+
+                </div>
+                <div className="show_image">
+                    {APIimagesURL.map((imgName, index) => (
+                        <div className="image_box" key={index}>
+                            <div className='imagecard'>
+                                <img src={'http://localhost:4000/' + imgName} alt={"product" + index} height="150" />
+                                <div className="prod_delete_button">
+                                    <Tooltip title="Delete">
+                                        <IconButton aria-label="delete" size="large" onClick={() => DeleteImageAPI(imgName,index)} >
+                                            <DeleteIcon sx={{ color: 'red' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {imagesURL.map((imgName, index) => (
+                        <div className="image_box" key={index}>
+                            <div className='imagecard'>
+                                <img src={imgName} alt={"product" + index} height="150" />
+                                <div className="prod_delete_button">
+                                    <Tooltip title="Delete">
+                                        <IconButton aria-label="delete" size="large" onClick={() => deleteImage(index)} >
+                                            <DeleteIcon sx={{ color: 'red' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <div>
                     <Fab variant="extended" color="secondary" disabled={Addbutton} type='submit'>

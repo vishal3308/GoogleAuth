@@ -1,14 +1,15 @@
 const express = require('express');
-const session = require('express-session')
-const passport = require('passport')
-const cors = require('cors')
+const session = require('express-session');
+const passport = require('passport');
+const cors = require('cors');
+const multer=require('multer');
+const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken');
 const jwtkey = 'e-commerce';
 const PORT = process.env.PORT || 4000;
 const PortalURL = 'http://localhost:3000';
 const Sign_Login=require('./Router/Sign_Login')
 const Product_Route=require('./Router/Product')
-const nodemailer=require('nodemailer')
 require('./Database/MongoConnect');
 require('./Passport/googleauth');
 const app = express();
@@ -19,6 +20,7 @@ app.use(session({
   cookie: { secure: true }
 }))
 app.use(express.json());
+app.use(express.static(__dirname))
 app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());

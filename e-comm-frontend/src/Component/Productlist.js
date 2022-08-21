@@ -188,7 +188,7 @@ export default function CustomPaginationActionsTable() {
       }).catch(err => {
         setError(err.message)
       })
-  })
+  },[deleteinfo])
 
   return (
     <TableContainer component={Paper} className="table-container">

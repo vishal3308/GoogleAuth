@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react'
-import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -9,8 +8,14 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Tooltip from '@mui/material/Tooltip';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Box } from '@mui/material';
 import { Url } from '../App';
-
+import { useEffect } from 'react';
+const axios = require('axios')
 // =============== Category Section Component===============
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -23,7 +28,7 @@ const MenuProps = {
     },
 };
 const category_list = ['Electronic', 'AutoMobile', 'Home Product',
-    'Game', 'Health', 'Excercise', 'Study', 'Entertainment','Mobile','Bike','TV'].sort();
+    'Game', 'Health', 'Excercise', 'Study', 'Entertainment', 'Mobile', 'Bike', 'TV'].sort();
 // =========================================================
 export default function Addproduct() {
     const url = useContext(Url);
@@ -32,51 +37,124 @@ export default function Addproduct() {
     const [values, setValues] = useState({
         productname: '',
         quantity: 1,
-        actualprice: 0,
-        sellingprice: 0,
+        actualprice: '',
+        sellingprice: '',
         category: '',
         brand: '',
         description: '',
     });
+    const [images, setImages] = useState([]);
+    const [imagesURL, setImagesURL] = useState([]);
 
     const handleChange = (prop) => (event) => {
         setValues({ ...values, [prop]: event.target.value });
     };
+
+    const handleimages = (e) => {
+        setError(0)
+        let files = [...e.target.files];
+        console.log(images.length + files.length)
+        if (images.length + files.length > 5) {
+            setError('Maximum 5 images are allow.');
+            return;
+        }
+        setImages([...images, ...files])
+        new Promise((res, rej) => {
+            let result = [];
+            files.map(element => { return result.push(URL.createObjectURL(element)) })
+            res(result);
+        }).then(res => {
+            setImagesURL([...imagesURL, ...res]);
+        }
+        )
+    }
+    const deleteImage = (index) => {
+        let Imagelist = images;
+        Imagelist.splice(index, 1)
+        setImages([...Imagelist])
+        Imagelist = imagesURL;
+        Imagelist.splice(index, 1)
+        setImagesURL([...Imagelist])
+    }
+
+    // ===================API calling for Adding New Product=====================
     const Formsubmit = (e) => {
         e.preventDefault();
         setAddbutton(true)
-        // ===================API calling for Adding New Product=====================
         const token = localStorage.getItem('E-comm_token');
-        fetch(url + '/addproduct', {
+        const formData = new FormData();
+        console.log(images)
+        images.map(img => {
+            formData.append('file', img);
+        })
+        for (const key in values) {
+            formData.append(key, values[key]);
+        }
+        axios({
             method: 'post',
+            url: url + '/addproduct',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'multipart/form-data',
                 'Authorization': token
             },
-            body: JSON.stringify(values)
-        }).then((resp) => resp.json())
-            .then((res) => {
-                if (res.Error) {
-                    setError(res.Error);
-                }
-                else {
-                    setError(1);
-                    setValues({
-                        productname: '',
-                        quantity: 1,
-                        actualprice: 0,
-                        sellingprice: 0,
-                        category: '',
-                        brand: '',
-                        description: '',
-                    })
+            data: formData
+        }).then((response) => {
+            let res = response.data;
+            if (res.Error) {
+                setError(res.Error);
+            }
+            else {
+                setError(1);
+                setValues({
+                    productname: '',
+                    quantity: 1,
+                    actualprice: '',
+                    sellingprice: '',
+                    category: '',
+                    brand: '',
+                    description: '',
+                })
+                setImagesURL([])
+                setImages([])
 
-                }
-            }).catch((err) => {
-                setError(err.message)
-            }).finally(() => {
-                setAddbutton(false)
-            })
+
+            }
+        }).catch((err) => {
+            setError(err.message)
+        }).finally(() => {
+            setAddbutton(false)
+        })
+
+        // fetch(url + '/addproduct', {
+        //     method: 'post',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': token
+        //     },
+        //     body: JSON.stringify(values)
+        // }).then((resp) => resp.json())
+        //     .then((res) => {
+        //         if (res.Error) {
+        //             setError(res.Error);
+        //         }
+        //         else {
+        //             setError(1);
+        //             setValues({
+        //                 productname: '',
+        //                 quantity: 1,
+        //                 actualprice: 0,
+        //                 sellingprice: 0,
+        //                 category: '',
+        //                 brand: '',
+        //                 description: '',
+        //             })
+
+        //         }
+        //     }).catch((err) => {
+        //         setError(err.message)
+        //     }).finally(() => {
+        //         setAddbutton(false)
+        //     })
     }
     return (
         <>
@@ -143,8 +221,8 @@ export default function Addproduct() {
                             MenuProps={MenuProps}
                         >
                             <MenuItem value={"Other"}><em>Other</em></MenuItem>
-                            {category_list.map((item) => (
-                                <MenuItem key={item} value={item}>{item}</MenuItem>
+                            {category_list.map((item, id) => (
+                                <MenuItem key={id} value={item}>{item}</MenuItem>
 
                             ))}
 
@@ -167,6 +245,27 @@ export default function Addproduct() {
                         onChange={handleChange('description')}
                         color="secondary"
                     />
+                </div>
+                <div className="product_image">
+                    <span>Pleaes choose multiple image of product</span>
+                    <input type="file" name="Product_image" multiple accept='image/*' onChange={(e) => handleimages(e)} />
+                </div>
+                <div className="show_image">
+                    {imagesURL.map((imgName, index) => (
+                        <div className="image_box" key={index}>
+                            <div className='imagecard'>
+                                <img src={imgName} alt={"product" + index} height="150" />
+                                <div className="prod_delete_button">
+
+                                    <Tooltip title="Delete">
+                                        <IconButton aria-label="delete" size="large" onClick={() => deleteImage(index)} >
+                                            <DeleteIcon sx={{ color: 'red' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <div>
                     <Fab variant="extended" color="secondary" disabled={Addbutton} type='submit'>

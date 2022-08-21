@@ -31,6 +31,9 @@ const ProductSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    images:{
+        type:Array
+    },
     userid: {
         type: String,
         required: true
